@@ -6,6 +6,14 @@
 
 ---
 
+## Product Results Show
+
+下图展示了项目在真实任务中的界面效果，包括多 Agent 工作流、调试链路、会话记忆面板、沙盒产物导出，以及生成结果的可视化输出。
+
+![Product Results Show](<Product results show.png>)
+
+---
+
 ## 项目亮点
 
 - **Multi-Agent 协作**：基于 LangGraph 将任务拆分为 `Researcher / Coder / Examiner` 三类 Agent。
@@ -183,7 +191,6 @@ PINN_AGENT_QWEN_MODEL_CODER=qwen3-coder-plus
 PINN_AGENT_QWEN_MODEL_EXAMINER=qwen-plus
 ```
 
-注意：`.env` 已被 `.gitignore` 忽略，请不要把 API Key 提交到 GitHub。
 
 ### 5. 构建 Docker 沙盒镜像
 
@@ -486,4 +493,3 @@ python -m eval.runner --mode mock --judge-mode heuristic
 
 - MIT License：宽松，适合社区使用和二次开发
 - Apache-2.0：包含更明确的专利授权条款
-
