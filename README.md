@@ -371,24 +371,6 @@ python tests/smoke_test_phase2.py
 
 ---
 
-## 技术报告
-
-如果你想深入理解项目设计，可以阅读：
-
-- [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md)
-
-这份报告包含：
-
-- 顶层架构
-- 工作流主链路
-- 三个 Agent 的职责边界
-- 记忆系统设计
-- 沙盒执行设计
-- 评测体系设计
-- 推荐源码阅读顺序
-- 面试讲解思路
-
----
 
 ## 常见问题
 
