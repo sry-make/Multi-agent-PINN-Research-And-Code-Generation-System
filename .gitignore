@@ -1,0 +1,53 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Test / coverage / lint caches
+.pytest_cache/
+.coverage
+.coverage.*
+.mypy_cache/
+.ruff_cache/
+
+# Local environment files
+.env
+.env.local
+.venv/
+venv/
+
+# Local IDE / agent workspace state
+.codex
+
+# Runtime logs
+logs/*
+!logs/.gitkeep
+
+# Session memory snapshots
+memory/sessions/*
+!memory/sessions/.gitkeep
+
+# Generated outputs
+outputs/*
+!outputs/.gitkeep
+!outputs/sandbox_runs/
+outputs/sandbox_runs/*
+!outputs/sandbox_runs/.gitkeep
+
+# Eval run artifacts
+eval/runs/*
+!eval/runs/.gitkeep
+
+# Local planning / long-term memory data
+memory.md
+memory/project_memory.json
+memory/experience_db.jsonl
+
+# Generated RAG data / local research corpus
+rag/chroma_db/
+papers/
+
+# OS files
+.DS_Store
+
+TECHNICAL_REPORT.md

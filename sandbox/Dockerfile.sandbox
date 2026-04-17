@@ -1,0 +1,36 @@
+# PINN Agent V2 — 代码沙盒镜像
+# 运行 Coder Agent 生成的代码，完全隔离于宿主机
+#
+# 构建: docker build -t pinn_agent_sandbox:latest -f sandbox/Dockerfile.sandbox .
+# 运行示例（由 docker_runner.py 自动调用，无需手动执行）:
+#   docker run --rm --network none --cpus="2" --memory="2g"
+#              -v /tmp/sandbox_work:/workspace
+#              pinn_agent_sandbox:latest python /workspace/solution.py
+
+FROM python:3.11-slim
+
+# ── 系统依赖 ────────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── 科学计算依赖（固定版本，确保可复现）──────────────────────
+RUN pip install --no-cache-dir \
+    numpy==1.26.4 \
+    scipy==1.13.0 \
+    matplotlib==3.8.4 \
+    sympy==1.12 \
+    torch==2.3.0+cpu \
+    --extra-index-url https://download.pytorch.org/whl/cpu
+
+# ── 工作目录（由宿主机以只读/读写卷挂载）────────────────────
+WORKDIR /workspace
+
+# ── 安全加固 ─────────────────────────────────────────────────
+# 以非 root 用户运行，限制提权风险
+RUN useradd -m -u 1001 sandbox_user
+USER sandbox_user
+
+# ── 默认入口：由 docker_runner.py 动态替换 CMD ────────────────
+CMD ["python", "--version"]
