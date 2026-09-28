@@ -7,6 +7,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 from memory.session_manager import SessionManager
 from orchestrator.graph import build_graph
+from orchestrator.router import RouterDecision
 
 
 pytestmark = pytest.mark.workflow
@@ -51,7 +52,17 @@ def test_memory_continuity_updates_recent_queries_and_digest(tmp_path) -> None:
         with patch("memory.load_project_memory", return_value={}):
             with patch("memory.retrieve_experience_hints", return_value=[]):
                 with patch("memory.append_experience_record", side_effect=appended_records.append):
-                    with patch("orchestrator.graph.detect_intent", return_value="code"):
+                    with patch(
+                        "orchestrator.graph.resolve_intent",
+                        return_value=RouterDecision(
+                            intent="code",
+                            source="test",
+                            confidence=1.0,
+                            entropy=0.0,
+                            scores={"qa": 0.0, "survey": 0.0, "code": 1.0, "full_pipeline": 0.0},
+                            default_intent="code",
+                        ),
+                    ):
                         with patch("agents.coder.run_coder", side_effect=mock_coder):
                             with patch("agents.examiner.run_examiner", side_effect=mock_examiner):
                                 graph = build_graph()

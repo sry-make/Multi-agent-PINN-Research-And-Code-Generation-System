@@ -1,0 +1,62 @@
+flowchart LR
+
+    %% ── Clean Styles ────────────────────────────────────────
+    classDef start fill:#DBEAFE,stroke:#2563EB,stroke-width:2px,color:#1E40AF,font-weight:bold,rx:25,ry:25
+    classDef process fill:#F8FAFC,stroke:#94A3B8,stroke-width:1.5px,color:#334155
+    classDef agent1 fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E,font-weight:bold
+    classDef agent2 fill:#DBEAFE,stroke:#2563EB,stroke-width:2px,color:#1E40AF,font-weight:bold
+    classDef agent3 fill:#FEF9C3,stroke:#CA8A04,stroke-width:2px,color:#713F12,font-weight:bold
+    classDef mem fill:#EDE9FE,stroke:#7C3AED,stroke-width:1.5px,color:#5B21B6
+    classDef done fill:#D1FAE5,stroke:#059669,stroke-width:2px,color:#065F46,font-weight:bold,rx:25,ry:25
+    classDef decide fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E
+
+    %% ── Main Flow ───────────────────────────────────────────
+    Q(["🔍 User Query"]):::start
+    PI["🧭 Parse Intent"]:::process
+    MR["🧠 Memory Read"]:::mem
+
+    Q --> PI -->|"full_pipeline"| MR
+
+    %% ── Phase 1: Researcher ─────────────────────────────────
+    subgraph P1 ["📚 Phase 1"]
+        R["🔬 Researcher Agent"]:::agent1
+        R -.->|tools| R_T["search_arxiv · RAG\nweb_search · formula"]
+    end
+
+    MR --> R
+
+    %% ── Phase 2: Coder ──────────────────────────────────────
+    subgraph P2 ["💻 Phase 2"]
+        C["⚡ Coder Agent"]:::agent2
+        C -.->|tools| C_T["execute_python\n🐳 Docker Sandbox"]
+    end
+
+    R -->|"design_proposal\nliterature_report"| C
+
+    %% ── Phase 3: Examiner ───────────────────────────────────
+    subgraph P3 ["🔍 Phase 3"]
+        E["🏛️ Examiner Agent"]:::agent3
+        E -.-> E1["📖 Academic\nReview"]
+        E -.-> E2["🔧 Code\nReview"]
+    end
+
+    C -->|"code + results"| E
+
+    %% ── Verdict ─────────────────────────────────────────────
+    V{"✅ Pass?"}:::decide
+    E --> V
+
+    V -->|"PASS"| S["📝 Synthesize"]:::done
+    V -. "FAIL · retry ≤ 3" .-> C
+
+    S --> MW["💾 Memory Write"]:::mem
+    MW --> F(["🎯 Final Answer"]):::done
+
+    %% ── Subgraph Styles ─────────────────────────────────────
+    style P1 fill:#FFFBEB,stroke:#D97706,stroke-width:1.5px,rx:12,ry:12,color:#92400E
+    style P2 fill:#EFF6FF,stroke:#2563EB,stroke-width:1.5px,rx:12,ry:12,color:#1E40AF
+    style P3 fill:#FEFCE8,stroke:#CA8A04,stroke-width:1.5px,rx:12,ry:12,color:#713F12
+    style R_T fill:#ECFDF5,stroke:#10B981,stroke-width:1px,color:#047857,font-size:11px
+    style C_T fill:#FFF1F2,stroke:#F43F5E,stroke-width:1px,color:#BE123C,font-size:11px
+    style E1 fill:#ECFDF5,stroke:#10B981,stroke-width:1px,color:#047857,font-size:11px
+    style E2 fill:#ECFDF5,stroke:#10B981,stroke-width:1px,color:#047857,font-size:11px

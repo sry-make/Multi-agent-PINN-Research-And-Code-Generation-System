@@ -7,6 +7,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 from memory.session_manager import SessionManager
 from orchestrator.graph import build_graph
+from orchestrator.router import RouterDecision
 
 
 pytestmark = pytest.mark.workflow
@@ -70,7 +71,17 @@ def test_full_pipeline_mocked_produces_research_code_review_and_memory(tmp_path)
         with patch("memory.load_project_memory", return_value={}):
             with patch("memory.retrieve_experience_hints", return_value=[]):
                 with patch("memory.append_experience_record", side_effect=appended_records.append):
-                    with patch("orchestrator.graph.detect_intent", return_value="full_pipeline"):
+                    with patch(
+                        "orchestrator.graph.resolve_intent",
+                        return_value=RouterDecision(
+                            intent="full_pipeline",
+                            source="test",
+                            confidence=1.0,
+                            entropy=0.0,
+                            scores={"qa": 0.0, "survey": 0.0, "code": 0.0, "full_pipeline": 1.0},
+                            default_intent="full_pipeline",
+                        ),
+                    ):
                         with patch("agents.researcher.run_researcher", side_effect=mock_researcher):
                             with patch("agents.coder.run_coder", side_effect=mock_coder):
                                 with patch("agents.examiner.run_examiner", side_effect=mock_examiner):

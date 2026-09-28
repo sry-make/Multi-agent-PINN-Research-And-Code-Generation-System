@@ -49,5 +49,6 @@ papers/
 
 # OS files
 .DS_Store
+*:Zone.Identifier
 
 TECHNICAL_REPORT.md

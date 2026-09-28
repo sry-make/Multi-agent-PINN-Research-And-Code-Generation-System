@@ -279,6 +279,17 @@ EVAL_JUDGE_WEIGHT = float(
 LLM_TEMPERATURE  = 0.1
 LLM_MAX_TOKENS   = 2048
 
+# Router 低置信度判定
+ROUTER_CONFIDENCE_THRESHOLD = float(
+    _getenv_first("PINN_AGENT_ROUTER_CONFIDENCE_THRESHOLD", default="0.68")
+)
+ROUTER_ENTROPY_THRESHOLD = float(
+    _getenv_first("PINN_AGENT_ROUTER_ENTROPY_THRESHOLD", default="0.82")
+)
+ROUTER_AMBIGUITY_MARGIN = float(
+    _getenv_first("PINN_AGENT_ROUTER_AMBIGUITY_MARGIN", default="0.10")
+)
+
 # Examiner 深度审查时的输入截断阈值（避免误判半截代码）
 EXAMINER_REVIEW_MAX_REPORT_CHARS = int(
     _getenv_first("PINN_AGENT_EXAMINER_REPORT_CHARS", default="4000")
@@ -344,6 +355,21 @@ ARXIV_SORT_BY         = "relevance"              # "relevance" | "lastUpdatedDat
 # DuckDuckGo / SerpAPI（可选）
 SERPAPI_KEY           = ""                       # 留空则降级用 DuckDuckGo
 WEB_SEARCH_MAX_RESULTS = 5
+WEB_SEARCH_CANDIDATE_POOL = int(
+    _getenv_first("PINN_AGENT_WEB_SEARCH_CANDIDATE_POOL", default="8")
+)
+WEB_SEARCH_ENABLE_QUERY_REWRITE = _getenv_bool(
+    "PINN_AGENT_WEB_SEARCH_ENABLE_QUERY_REWRITE",
+    default=True,
+)
+WEB_SEARCH_ENABLE_RERANK = _getenv_bool(
+    "PINN_AGENT_WEB_SEARCH_ENABLE_RERANK",
+    default=True,
+)
+WEB_SEARCH_QUERY_REWRITE_MODEL = _getenv_first(
+    "PINN_AGENT_WEB_SEARCH_QUERY_REWRITE_MODEL",
+    default=MODEL_RESEARCHER,
+)
 
 # ─────────────────────────────────────────────
 # Examiner Agent 审查

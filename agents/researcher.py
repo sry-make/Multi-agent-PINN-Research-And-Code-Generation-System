@@ -29,6 +29,7 @@ from langchain_core.messages import (
 from langchain_openai import ChatOpenAI
 
 from config import (
+    EXAMINER_MAX_RETRIES,
     LLM_MAX_TOKENS,
     LLM_TEMPERATURE,
     MODEL_RESEARCHER,
@@ -86,6 +87,19 @@ _DESIGN_INSTRUCTION = """
 - 损失函数设计（含权重策略）
 - 关键超参数建议
 - 预期挑战与应对策略
+"""
+
+_RESEARCHER_RETRY_TEMPLATE = """\
+Examiner 审查未通过，请根据以下反馈修正你的综述/方案。
+
+【Examiner 审查意见】
+{examiner_feedback}
+
+【原始查询】
+{query}
+
+这是第 {retry_num} 次修正（最多 {max_retries} 次）。
+请重新检索并给出修正后的完整综述，不要只修改片段。\
 """
 
 
@@ -223,7 +237,32 @@ def run_researcher(state: AgentState) -> dict:
     )
 
     # 根据 intent 组装用户提示
-    if intent == "survey":
+    is_retry = (
+        state.get("examiner_retry_count", 0) > 0
+        and state.get("examiner_verdict") == "FAIL"
+    )
+
+    if is_retry:
+        # Examiner 打回重试：注入审查意见
+        feedback_parts = []
+        if state.get("academic_review"):
+            feedback_parts.append(f"[学术审查] {state['academic_review']}")
+        if state.get("code_review"):
+            feedback_parts.append(f"[代码审查] {state['code_review']}")
+        examiner_feedback = "\n".join(feedback_parts) if feedback_parts else "（无）"
+
+        user_text = _RESEARCHER_RETRY_TEMPLATE.format(
+            examiner_feedback=examiner_feedback,
+            query=query,
+            retry_num=state.get("examiner_retry_count", 1),
+            max_retries=EXAMINER_MAX_RETRIES,
+        )
+        # 重试时仍追加 survey/design 指令
+        if intent in ("survey", "full_pipeline"):
+            user_text += _SURVEY_INSTRUCTION
+        if intent == "full_pipeline":
+            user_text += _DESIGN_INSTRUCTION
+    elif intent == "survey":
         user_text = query + _SURVEY_INSTRUCTION
     elif intent == "full_pipeline":
         user_text = query + _SURVEY_INSTRUCTION + _DESIGN_INSTRUCTION

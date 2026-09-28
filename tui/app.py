@@ -53,6 +53,13 @@ from observability.cost_tracker import cost_tracker
 from observability.tracer import tracer
 
 
+def _format_exception_markdown(exc: Exception) -> str:
+    """Render exceptions safely inside Markdown, including HTML payloads."""
+    message = str(exc).strip() or repr(exc).strip() or type(exc).__name__
+    message = message.replace("```", "'''")
+    return f"❌ 错误: `{type(exc).__name__}`\n\n```text\n{message}\n```"
+
+
 # ── 自定义 Widget ─────────────────────────────────────────────
 
 class AgentStatusPanel(Static):
@@ -765,10 +772,14 @@ class PINNAgentApp(App):
 
         except Exception as exc:
             await chat_view.stream_response(
-                f"❌ 错误: {exc}",
+                _format_exception_markdown(exc),
                 animate=not self._show_debug,
             )
-            tool_log.log_tool("System", "ERROR", str(exc))
+            tool_log.log_tool(
+                "System",
+                "ERROR",
+                f"{type(exc).__name__}: {str(exc).strip() or repr(exc)}",
+            )
 
         finally:
             if not stop_trace_poll.is_set():

@@ -8,7 +8,7 @@ TypedDict 定义让 LangGraph 能做静态类型检查。
 from __future__ import annotations
 
 from typing import Annotated, Any
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 from langgraph.graph.message import add_messages
 
 
@@ -22,6 +22,16 @@ class AgentState(TypedDict):
     # ── 路由 ─────────────────────────────────────────────────
     intent: str                             # 意图类型: "qa" | "survey" | "code" | "full_pipeline"
     current_step: str                       # 当前 SOP 步骤名
+    router_source: NotRequired[str]         # 路由来源: rule | llm | llm_default | llm_clarify | fallback
+    router_confidence: NotRequired[float]   # 最大意图概率
+    router_entropy: NotRequired[float]      # 归一化熵，越高代表越不确定
+    router_reason: NotRequired[str]         # 路由解释
+    router_scores: NotRequired[dict[str, float]]  # 四类意图的概率分布
+    router_needs_clarification: NotRequired[bool]
+    router_clarification_question: NotRequired[str]
+    router_missing_information: NotRequired[list[str]]
+    router_default_intent: NotRequired[str]
+    router_defaulted: NotRequired[bool]
 
     # ── 多轮消息历史（LangGraph 原生 add_messages reducer）──
     messages: Annotated[list, add_messages]

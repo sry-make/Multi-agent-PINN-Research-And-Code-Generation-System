@@ -146,8 +146,11 @@ def build_session_summary(
     if query and not str(summary.get("user_goal", "")).strip():
         summary["user_goal"] = _trim_text(query, 200)
 
-    if state.get("intent"):
-        summary["last_intent"] = str(state["intent"])
+    effective_intent = str(state.get("intent", "")).strip()
+    if effective_intent == "clarify":
+        effective_intent = str(state.get("router_default_intent", "")).strip() or effective_intent
+    if effective_intent:
+        summary["last_intent"] = effective_intent
 
     summary["message_window_size"] = len(list(state.get("messages") or []))
 

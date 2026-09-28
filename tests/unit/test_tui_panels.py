@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tui.app import ArtifactPanel, MemoryStatusPanel
+from tui.app import ArtifactPanel, MemoryStatusPanel, _format_exception_markdown
 
 
 pytestmark = pytest.mark.unit
@@ -42,3 +42,23 @@ def test_artifact_panel_shows_current_run_outputs() -> None:
     assert "本次产物: 2 个" in content
     assert "result.png" in content
     assert "train.log" in content
+
+
+def test_format_exception_markdown_preserves_html_payload() -> None:
+    exc = RuntimeError("<html><h1>401 Authorization Required</h1></html>")
+
+    rendered = _format_exception_markdown(exc)
+
+    assert "RuntimeError" in rendered
+    assert "```text" in rendered
+    assert "<html><h1>401 Authorization Required</h1></html>" in rendered
+
+
+def test_format_exception_markdown_handles_empty_message() -> None:
+    class SilentError(Exception):
+        pass
+
+    rendered = _format_exception_markdown(SilentError())
+
+    assert "SilentError" in rendered
+    assert "```text" in rendered

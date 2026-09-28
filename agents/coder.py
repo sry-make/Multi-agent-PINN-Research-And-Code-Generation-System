@@ -84,7 +84,7 @@ _SYSTEM_PROMPT = """\
 """
 
 _RETRY_TEMPLATE = """\
-上一次代码执行失败，请分析错误并修复。
+上一次代码未通过 Examiner 审查，请分析错误并修复。
 
 【失败代码】
 ```python
@@ -101,8 +101,11 @@ _RETRY_TEMPLATE = """\
 {stdout}
 ```
 
+【Examiner 审查意见】
+{examiner_feedback}
+
 这是第 {retry_num} 次修复尝试（最多 {max_retries} 次）。
-请直接给出修复后的完整代码并重新执行，不要只修改片段。\
+请根据审查意见和错误信息，给出修复后的完整代码并重新执行，不要只修改片段。\
 """
 
 
@@ -461,12 +464,20 @@ def run_coder(state: AgentState) -> dict:
             f"{prefix}请根据以上背景，为以下需求编写 PINN Python 代码并执行验证：\n\n{query}"
         )
     else:
-        # 重试：携带失败信息
+        # 重试：携带失败信息 + Examiner 审查意见
         from config import EXAMINER_MAX_RETRIES
+        feedback_parts = []
+        if state.get("code_review"):
+            feedback_parts.append(f"[代码审查] {state['code_review']}")
+        if state.get("academic_review"):
+            feedback_parts.append(f"[学术审查] {state['academic_review']}")
+        examiner_feedback = "\n".join(feedback_parts) if feedback_parts else "（无）"
+
         retry_text = _RETRY_TEMPLATE.format(
             code=state.get("generated_code", "（无代码）"),
             stderr=state.get("execution_stderr", ""),
             stdout=state.get("execution_stdout", ""),
+            examiner_feedback=examiner_feedback,
             retry_num=retry_count,
             max_retries=EXAMINER_MAX_RETRIES,
         )

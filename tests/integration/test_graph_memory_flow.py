@@ -20,6 +20,7 @@ def test_build_graph_contains_memory_nodes() -> None:
         "__start__",
         "parse_intent",
         "memory_read",
+        "clarify",
         "researcher",
         "coder",
         "examiner",
@@ -49,6 +50,33 @@ def test_node_memory_read_compresses_prior_messages(tmp_path) -> None:
     assert compressed_messages
     assert getattr(compressed_messages[0], "id", "") == "__remove_all__"
     assert "conversation_digest" in (result.get("session_summary") or {})
+
+
+def test_node_memory_read_reuses_last_intent_for_contextual_followup(tmp_path) -> None:
+    manager = SessionManager(tmp_path)
+    manager.save_summary(
+        "pytest-followup",
+        {
+            "session_id": "pytest-followup",
+            "last_intent": "code",
+            "recent_queries": ["写一个最小 PINN 代码"],
+        },
+    )
+
+    with patch("memory.SessionManager", return_value=manager):
+        result = node_memory_read(
+            {
+                "query": "继续上次那个",
+                "intent": "clarify",
+                "router_needs_clarification": True,
+                "session_id": "pytest-followup",
+                "messages": [],
+            }
+        )
+
+    assert result["intent"] == "code"
+    assert result["router_needs_clarification"] is False
+    assert result["router_defaulted"] is True
 
 
 def test_node_memory_writeback_persists_summary_and_experience(tmp_path) -> None:

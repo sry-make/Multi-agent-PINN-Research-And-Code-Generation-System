@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep *)",
+      "Bash(python figures/plot_architecture.py)",
+      "Bash(python *)",
+      "Bash(where mmdc *)",
+      "Bash(npm list *)",
+      "Bash(npm install *)"
+    ]
+  }
+}
