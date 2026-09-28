@@ -51,4 +51,8 @@ papers/
 .DS_Store
 *:Zone.Identifier
 
+#interviewer files
+Interview_Record.md
 TECHNICAL_REPORT.md
+PROJECT_DEEP_DIVE.md
+PROJECT_HIGHLIGHTS_SHOWCASE.md
